@@ -1,5 +1,5 @@
 import algorithms as alg
-from environment import grid66
+from grid_environments import grid66
 from copy import copy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ episode_size = 50
 measurement_size = 30
 
 grid = copy(grid66)
-ahc = alg.AHC(grid, (1, 3), epsilon=0.05, gamma=0.9, beta=0.5, alpha=0.5)
+ahc = alg.Ahc(grid, (1, 3), epsilon=0.05, gamma=0.9, beta=0.5, alpha=0.5)
 ahc.learn(episode_size, measurement_size)
 print(ahc.data)
 
