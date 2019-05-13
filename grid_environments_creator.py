@@ -77,7 +77,7 @@ class GridEnvironment(EnvironmentABC):
                 return False
 
 
-    def createObstacleVertical (self,start_point, length_obstacle):
+    def createObstacleVertical (self, start_point, length_obstacle):
         """
 
         :param start_point: point from which creating will start
@@ -89,7 +89,7 @@ class GridEnvironment(EnvironmentABC):
         fit = self.__checkIfObstacleFit(start_point = start_point, length_obstacle = length_obstacle, orientation='V')
         if not fit:
             return print("Vertical obstacle doesn't fit")
-        x,y = start_point
+        x, y = start_point
         if length_obstacle > 0:
             for i in range(abs(length_obstacle)):
                 self.environment[x][y] = -2
@@ -149,7 +149,7 @@ class GridEnvironment(EnvironmentABC):
     def moveDown(self, start_point):
         x,y = start_point
         x += 1
-        if x > (self.size_vertical - 1) or self.getPrize(x,y) == -2:
+        if x > (self.size_vertical - 1) or self.getPrize(x, y) == -2:
             x -= 1
         return x
 
@@ -163,7 +163,7 @@ class GridEnvironment(EnvironmentABC):
     def moveRight(self,start_point):
         x, y = start_point
         y += 1
-        if y > (self.size_horizontal - 1) or self.getPrize(x,y) == -2:
+        if y > (self.size_horizontal - 1) or self.getPrize(x, y) == -2:
             y -= 1
         return y
 
@@ -203,6 +203,6 @@ class GridEnvironment(EnvironmentABC):
         return position_x * self.size_vertical + position_y
 
     def convert_state_to_position(self, state):
-         position_y = state % self.size_vertical
-         position_x = (state - position_y) / self.size_vertical
-         return position_x, position_y
+        position_y = state % self.size_vertical
+        position_x = (state - position_y) / self.size_vertical
+        return position_x, position_y
