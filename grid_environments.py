@@ -1,7 +1,7 @@
 import grid_environments_creator as env
 import math
 #grid66
-grid66 = env.GridEnvironment(6, 6, "to_win")
+grid66 = env.GridEnvironment(6, 6, "to_win", starting_position=(3, 4))
 grid66.createObstacleVertical((1, 1), -4)
 grid66.createObstacleVertical((1, 4), -4)
 grid66.createObstacleHorizontal((4, 3), 1)
@@ -10,7 +10,7 @@ grid66.setPrize((0, 5), 1)
 grid66.setPrize((5, 5), 0.5)
 
 #grid69
-grid69 = env.GridEnvironment(6, 9, "to_win")
+grid69 = env.GridEnvironment(6, 9, "to_win",starting_position=(5, 2))
 grid69.createObstacleVertical((1, 2), -3)
 grid69.createObstacleVertical((4, 5), 1)
 grid69.createObstacleVertical((0, 7), -3)

@@ -8,13 +8,15 @@ class GridEnvironment(EnvironmentABC):
     Tool for creating and usage of the grid environment
 
     """
-    def __init__(self, size_horizontal, size_vertical, type, st_con_loose=100):
+    def __init__(self, size_horizontal, size_vertical, type, starting_position, st_con_loose=100, ):
         """
         :param type: type of enviorment 'to_win' or 'to_lose'
         :param st_con_loose: number of actions after the learning will stop for 'to_loose' environment
         """
         self.size_vertical = size_vertical
         self.size_horizontal = size_horizontal
+        self.size_state = size_horizontal * size_vertical
+        self.state = self.convert_position_to_state(starting_position)
         self.environment = [[0 for x in range(self.size_vertical)] for x in range(self.size_horizontal)]
         self.__actions = [1, 2, 3, 4]
         self.__type = type
@@ -75,7 +77,7 @@ class GridEnvironment(EnvironmentABC):
                 return False
 
 
-    def createObstacleVertical (self,start_point, length_obstacle):
+    def createObstacleVertical (self, start_point, length_obstacle):
         """
 
         :param start_point: point from which creating will start
@@ -87,7 +89,7 @@ class GridEnvironment(EnvironmentABC):
         fit = self.__checkIfObstacleFit(start_point = start_point, length_obstacle = length_obstacle, orientation='V')
         if not fit:
             return print("Vertical obstacle doesn't fit")
-        x,y = start_point
+        x, y = start_point
         if length_obstacle > 0:
             for i in range(abs(length_obstacle)):
                 self.environment[x][y] = -2
@@ -133,7 +135,8 @@ class GridEnvironment(EnvironmentABC):
         x,y = point
         self.environment[x][y] = value
 
-    def getPrize(self, x, y):
+    def getPrize(self, state):
+        x, y = self.convert_state_to_position(state)
         return self.environment[x][y]
 
     def moveUp(self, start_point):
@@ -146,7 +149,7 @@ class GridEnvironment(EnvironmentABC):
     def moveDown(self, start_point):
         x,y = start_point
         x += 1
-        if x > (self.size_vertical - 1) or self.getPrize(x,y) == -2:
+        if x > (self.size_vertical - 1) or self.getPrize(x, y) == -2:
             x -= 1
         return x
 
@@ -160,13 +163,13 @@ class GridEnvironment(EnvironmentABC):
     def moveRight(self,start_point):
         x, y = start_point
         y += 1
-        if y > (self.size_horizontal - 1) or self.getPrize(x,y) == -2:
+        if y > (self.size_horizontal - 1) or self.getPrize(x, y) == -2:
             y -= 1
         return y
 
-    def make_move(self, action, environment_parameters):
+    def make_move(self, action, state):
 
-        current_position_x, current_position_y = environment_parameters
+        current_position_x, current_position_y = self.convert_state_to_position(state)
 
         if action == 1:
             current_position_x = self.moveUp((current_position_x, current_position_y))
@@ -179,13 +182,11 @@ class GridEnvironment(EnvironmentABC):
         else :
             print (f"Wrong action number: {action}")
 
-        return action, current_position_x, current_position_y
+        return action, self.convert_position_to_state((current_position_x, current_position_y))
 
-    def is_absorbing_state (self, environment_parameters, quantity_actions):
+    def is_absorbing_state(self, state, quantity_actions):
 
-        current_position_x, current_position_y = environment_parameters
-
-        prize = self.getPrize(current_position_x, current_position_y)
+        prize = self.getPrize(state)
         if self.__type == "to_win":
             return prize == 1 or prize == 0.5
         elif self.__type == "to_loose":
@@ -198,5 +199,10 @@ class GridEnvironment(EnvironmentABC):
         :param position: takes tuple of (row, column) of grid environment
         :return: int
         """
-        current_position_x, current_position_y = position
-        return current_position_x * 8 + current_position_y
+        position_x, position_y = position
+        return position_x * self.size_vertical + position_y
+
+    def convert_state_to_position(self, state):
+        position_y = state % self.size_vertical
+        position_x = (state - position_y) / self.size_vertical
+        return position_x, position_y
