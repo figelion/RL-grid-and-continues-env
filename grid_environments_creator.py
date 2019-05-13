@@ -182,13 +182,11 @@ class GridEnvironment(EnvironmentABC):
         else :
             print (f"Wrong action number: {action}")
 
-        return action, self.convert_position_to_state((current_position_x,current_position_y))
+        return action, self.convert_position_to_state((current_position_x, current_position_y))
 
-    def is_absorbing_state (self, environment_parameters, quantity_actions):
+    def is_absorbing_state(self, state, quantity_actions):
 
-        current_position_x, current_position_y = environment_parameters
-
-        prize = self.getPrize(current_position_x, current_position_y)
+        prize = self.getPrize(state)
         if self.__type == "to_win":
             return prize == 1 or prize == 0.5
         elif self.__type == "to_loose":
