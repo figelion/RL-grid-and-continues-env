@@ -8,13 +8,15 @@ class GridEnvironment(EnvironmentABC):
     Tool for creating and usage of the grid environment
 
     """
-    def __init__(self, size_horizontal, size_vertical, type, st_con_loose=100):
+    def __init__(self, size_horizontal, size_vertical, type, starting_position, st_con_loose=100, ):
         """
         :param type: type of enviorment 'to_win' or 'to_lose'
         :param st_con_loose: number of actions after the learning will stop for 'to_loose' environment
         """
         self.size_vertical = size_vertical
         self.size_horizontal = size_horizontal
+        self.size_state = size_horizontal * size_vertical
+        self.state = self.convert_position_to_state(starting_position)
         self.environment = [[0 for x in range(self.size_vertical)] for x in range(self.size_horizontal)]
         self.__actions = [1, 2, 3, 4]
         self.__type = type
@@ -133,7 +135,8 @@ class GridEnvironment(EnvironmentABC):
         x,y = point
         self.environment[x][y] = value
 
-    def getPrize(self, x, y):
+    def getPrize(self, state):
+        x, y = self.convert_state_to_position(state)
         return self.environment[x][y]
 
     def moveUp(self, start_point):
@@ -164,9 +167,9 @@ class GridEnvironment(EnvironmentABC):
             y -= 1
         return y
 
-    def make_move(self, action, environment_parameters):
+    def make_move(self, action, state):
 
-        current_position_x, current_position_y = environment_parameters
+        current_position_x, current_position_y = self.convert_state_to_position(state)
 
         if action == 1:
             current_position_x = self.moveUp((current_position_x, current_position_y))
@@ -179,7 +182,7 @@ class GridEnvironment(EnvironmentABC):
         else :
             print (f"Wrong action number: {action}")
 
-        return action, current_position_x, current_position_y
+        return action, self.convert_position_to_state((current_position_x,current_position_y))
 
     def is_absorbing_state (self, environment_parameters, quantity_actions):
 
