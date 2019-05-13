@@ -4,9 +4,9 @@ from abc import abstractmethod
 
 
 class Algorithm:
-    def __init__(self, grid_environment, epsilon, beta, gamma, alpha, lambd=0):
+    def __init__(self, environment, epsilon, beta, gamma, alpha, lambd=0):
+        # todo description of coefficients
         """
-
         :param grid_environment:
         :param epsilon:
         :param beta:
@@ -14,8 +14,8 @@ class Algorithm:
         :param alpha:
         :param lambd:
         """
-        self._env = grid_environment
-        self._actions = grid_environment.actions
+        self._env = environment
+        self._actions = environment.actions
         self._epsilon = epsilon
         self._beta = beta
         self._gamma = gamma
@@ -46,22 +46,21 @@ class Algorithm:
 
 class Ahc(Algorithm):
 
-    def __init__(self, grid_environment, agent_position, epsilon, beta, gamma, alpha):
+    def __init__(self, grid_environment, epsilon, beta, gamma, alpha):
         super().__init__(grid_environment, epsilon, beta, gamma, alpha)
         self.__V = []
         self.__mi = []
-        self._starting_position_x, self._starting_position_y = agent_position
 
     # def __reset(self):
     #     self.V = np.ones(self._env.size_vertical, self._env.size_horizontal)
     #     self.mi = np.zeros(self._env.size_vertical, self._env.size_horizontal, len(self._actions))
 
-    def _make_action(self, current_position_x, current_position_y):
+    def _make_action(self, state):
         A = self._env.actions
         greedy_action = []
-        max_mi = max(self.__mi[current_position_x][current_position_y][:])
+        max_mi = max(self.__mi[state][:])
         for x in range(len(self._actions)):
-            if self.__mi[current_position_x][current_position_y][x] == max_mi:
+            if self.__mi[state][x] == max_mi:
                 # +1 because A = [1,2,3,4] and x <0,3>
                 greedy_action.append(x + 1)
         if random() < self._epsilon:
@@ -69,36 +68,33 @@ class Ahc(Algorithm):
         else:
             action = greedy_action[randint(0, (len(greedy_action) - 1))]
 
-        return self._env.make_move(action, current_position_x, current_position_y)
+        return self._env.make_move(action, state)
 
     def learn(self, size_episodes, size_measurement):
         for measurement in range(size_measurement):
-            self.__V = np.ones((self._env.size_vertical, self._env.size_horizontal))
-            self.__mi = np.zeros((self._env.size_vertical, self._env.size_horizontal, len(self._actions)))
+            self.__V = np.ones(self._env.size_state)
+            self.__mi = np.zeros(self._env.size_state, len(self._actions))
             self.data = np.empty((size_episodes, size_measurement))
 
             for episode in range(size_episodes):
 
-                current_position_x = self._starting_position_x
-                current_position_y = self._starting_position_x
+                current_state = self._env.state
                 self._rout = []
 
                 while True:
-                    previous_position_x = current_position_x
-                    previous_position_y = current_position_y
+                    previous_state = current_state
 
-                    action, current_position_x, current_position_y = self._make_action(previous_position_x,
-                                                                                       previous_position_y)
+                    action, current_position_x, current_position_y = self._make_action(current_state)
                     self._rout.append(action)
 
-                    prize = self._env.getPrize(current_position_x, current_position_y)
+                    prize = self._env.getPrize(current_state)
 
-                    delta = prize + self._gamma * self.__V[current_position_x][current_position_y] \
-                            - self.__V[previous_position_x][previous_position_y]
-                    self.__V[previous_position_x][previous_position_y] += self._alpha * delta
-                    self.__mi[previous_position_x][previous_position_y][action - 1] += self._beta * delta
+                    delta = prize + self._gamma * self.__V[current_state] \
+                            - self.__V[previous_state]
+                    self.__V[previous_state] += self._alpha * delta
+                    self.__mi[previous_state][action - 1] += self._beta * delta
 
-                    if self._env.is_absorbing_state(current_position_x, current_position_y, self._rout):
+                    if self._env.is_absorbing_state(current_state, self._rout):
                         self.data[episode][measurement] = len(self._rout)
                         break
 
