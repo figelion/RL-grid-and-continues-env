@@ -198,5 +198,10 @@ class GridEnvironment(EnvironmentABC):
         :param position: takes tuple of (row, column) of grid environment
         :return: int
         """
-        current_position_x, current_position_y = position
-        return current_position_x * 8 + current_position_y
+        position_x, position_y = position
+        return position_x * self.size_vertical + position_y
+
+    def convert_state_to_position(self, state):
+         position_y = state % self.size_vertical
+         position_x = (state - position_y) / self.size_vertical
+         return position_x, position_y
