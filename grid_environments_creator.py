@@ -140,31 +140,34 @@ class GridEnvironment(EnvironmentABC):
         x, y = self.convert_state_to_position(state)
         return self.environment[x][y]
 
+    def getPrize(self, x, y):
+        return self.environment[x][y]
+
     def moveUp(self, start_point):
         x,y = start_point
         x -= 1
-        if x < 0 or self.get_Prize(x, y) == -2:
+        if x < 0 or self.getPrize(x, y) == -2:
             x += 1
         return x
 
     def moveDown(self, start_point):
         x,y = start_point
         x += 1
-        if x > (self.size_vertical - 1) or self.get_Prize(x, y) == -2:
+        if x > (self.size_vertical - 1) or self.getPrize(x, y) == -2:
             x -= 1
         return x
 
     def moveLeft(self, start_point):
         x,y = start_point
         y -= 1
-        if y < 0 or self.get_Prize(x, y) == -2:
+        if y < 0 or self.getPrize(x, y) == -2:
             y += 1
         return y
 
     def moveRight(self,start_point):
         x, y = start_point
         y += 1
-        if y > (self.size_horizontal - 1) or self.get_Prize(x, y) == -2:
+        if y > (self.size_horizontal - 1) or self.getPrize(x, y) == -2:
             y -= 1
         return y
 
@@ -183,9 +186,9 @@ class GridEnvironment(EnvironmentABC):
         else :
             print (f"Wrong action number: {action}")
 
-        return action, self.convert_parameters_to_state((current_position_x, current_position_y))
+        return self.convert_parameters_to_state((current_position_x, current_position_y))
 
-    def is_absorbing_state(self, state, quantity_actions):
+    def is_absorbing_state(self, quantity_actions, state):
 
         prize = self.get_Prize(state)
         if self.__type == "to_win":
@@ -205,7 +208,7 @@ class GridEnvironment(EnvironmentABC):
 
     def convert_state_to_position(self, state):
         position_y = state % self.size_vertical
-        position_x = (state - position_y) / self.size_vertical
+        position_x = int((state - position_y) / self.size_vertical)
         return position_x, position_y
 
     def reset(self):

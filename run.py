@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 episode_size = 50
 measurement_size = 30
 
-#env = copy(grid66)
-env = BallBeam()
-ahc = alg.Ahc(env, (1, 3), epsilon=0.05, gamma=0.9, beta=0.5, alpha=0.5)
+env = copy(grid66)
+#env = BallBeam(stop_condition=1000, time_step=0.01)
+ahc = alg.Ahc(env, epsilon= 0.05, gamma=0.9, beta=0.5, alpha=0.5)
 ahc.learn(episode_size, measurement_size)
 print(ahc.data)
 

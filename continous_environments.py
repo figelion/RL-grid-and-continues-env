@@ -13,6 +13,7 @@ class BallBeam(EnvironmentABC):
         self.beam_length = beam_length
         self.size_state = 6 * 6
         self.stop_condition = stop_condition
+        self.actions = [1, 2, 3, 4, 5]
 
     def make_move(self, action, environment_parameters):
 
@@ -27,13 +28,15 @@ class BallBeam(EnvironmentABC):
         elif action == 5:
             self.angle = pi / 4.
 
-            self.speed += self.time_step*self.g*sin(self.aagle)
-            self.position += self.time_step*self.speed
+        self.speed += self.time_step*self.g*sin(self.angle)
+        self.position += self.time_step*self.speed
 
-    def is_absorbing_state(self, actions):
+        return self.convert_parameters_to_state()
+
+    def is_absorbing_state(self, actions, *args):
         if self.position > 1 : return True
         elif self.position < -1 : return True
-        elif actions == self.stop_condition : return True
+        elif len(actions) > self.stop_condition : return True
 
     def convert_parameters_to_state(self):
         if self.position > 1: state_x = 0
@@ -55,13 +58,13 @@ class BallBeam(EnvironmentABC):
     def convert_state_to_parameters(self, state):
         pass
 
-    def get_Prize(self):
+    def get_Prize(self, *args):
         if self.position > 1: prize = -1
         elif self.position >= 0.5: prize = 1
         elif self.position >= -0.1: prize = 2
         elif self.position >= -0.5: prize = 1
         elif self.position >= -1: prize = 1
-        elif self.position > 1: prize = -1
+        elif self.position < -1: prize = -1
 
         return prize
 
@@ -69,5 +72,6 @@ class BallBeam(EnvironmentABC):
         self.position = 0.1
         self.angle = - pi / 8
         self.speed = 0.1
+
         return self.convert_parameters_to_state()
 

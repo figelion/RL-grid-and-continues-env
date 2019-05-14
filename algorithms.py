@@ -46,10 +46,10 @@ class Algorithm:
 
 class Ahc(Algorithm):
 
-    def __init__(self, grid_environment, epsilon, beta, gamma, alpha):
-        super().__init__(grid_environment, epsilon, beta, gamma, alpha)
-        self.__V = []
-        self.__mi = []
+    def __init__(self, environment, epsilon, beta, gamma, alpha):
+        super().__init__(environment, epsilon, beta, gamma, alpha)
+        self._V = []
+        self._mi = []
 
     # def __reset(self):
     #     self.V = np.ones(self._env.size_vertical, self._env.size_horizontal)
@@ -58,9 +58,9 @@ class Ahc(Algorithm):
     def _make_action(self, state):
         A = self._env.actions
         greedy_action = []
-        max_mi = max(self.__mi[state][:])
+        max_mi = max(self._mi[state][:])
         for x in range(len(self._actions)):
-            if self.__mi[state][x] == max_mi:
+            if self._mi[state][x] == max_mi:
                 # +1 because A = [1,2,3,4] and x <0,3>
                 greedy_action.append(x + 1)
         if random() < self._epsilon:
@@ -68,33 +68,35 @@ class Ahc(Algorithm):
         else:
             action = greedy_action[randint(0, (len(greedy_action) - 1))]
 
-        return self._env.make_move(action, state)
+        return action, self._env.make_move(action, state)
 
     def learn(self, size_episodes, size_measurement):
         for measurement in range(size_measurement):
-            self.__V = np.ones(self._env.size_state)
-            self.__mi = np.zeros(self._env.size_state, len(self._actions))
+            self._V = np.ones(self._env.size_state)
+            self._mi = np.zeros((self._env.size_state, len(self._actions)))
             self.data = np.empty((size_episodes, size_measurement))
 
             for episode in range(size_episodes):
 
                 current_state = self._env.reset()
                 self._rout = []
+                print(episode)
 
                 while True:
                     previous_state = current_state
+                    print(current_state)
 
                     action, current_state = self._make_action(current_state)
                     self._rout.append(action)
+                    print(action)
 
                     prize = self._env.get_Prize(current_state)
 
-                    delta = prize + self._gamma * self.__V[current_state] \
-                            - self.__V[previous_state]
-                    self.__V[previous_state] += self._alpha * delta
-                    self.__mi[previous_state][action - 1] += self._beta * delta
+                    delta = prize + self._gamma * self._V[current_state] - self._V[previous_state]
+                    self._V[previous_state] = self._alpha * delta
+                    self._mi[previous_state][action - 1] += self._beta * delta
 
-                    if self._env.is_absorbing_state(current_state, self._rout):
+                    if self._env.is_absorbing_state(self._rout, current_state):
                         self.data[episode][measurement] = len(self._rout)
                         break
 
@@ -147,6 +149,6 @@ class AHClambda(Algorithm):
                     self.__V[previous_state] += self._alpha * delta
                     self.__mi[previous_state][action - 1] += self._beta * delta
 
-                    if self._env.is_absorbing_state(current_state, self._rout):
+                    if self._env.is_absorbing_state( self._rout, current_state):
                         self.data[episode][measurement] = len(self._rout)
                         break
