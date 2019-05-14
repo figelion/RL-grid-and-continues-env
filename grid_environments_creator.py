@@ -16,6 +16,7 @@ class GridEnvironment(EnvironmentABC):
         self.size_vertical = size_vertical
         self.size_horizontal = size_horizontal
         self.size_state = size_horizontal * size_vertical
+        self.starting_position = starting_position
         self.state = self.convert_position_to_state(starting_position)
         self.environment = [[0 for x in range(self.size_vertical)] for x in range(self.size_horizontal)]
         self.__actions = [1, 2, 3, 4]
@@ -206,3 +207,7 @@ class GridEnvironment(EnvironmentABC):
         position_y = state % self.size_vertical
         position_x = (state - position_y) / self.size_vertical
         return position_x, position_y
+
+    def reset(self):
+        self.state = self.convert_position_to_state(self.starting_position)
+        return self.state

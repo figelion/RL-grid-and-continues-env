@@ -78,7 +78,7 @@ class Ahc(Algorithm):
 
             for episode in range(size_episodes):
 
-                current_state = self._env.state
+                current_state = self._env.reset()
                 self._rout = []
 
                 while True:

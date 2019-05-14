@@ -5,13 +5,14 @@ from numpy import pi, sin
 class BallBeam(EnvironmentABC):
     g = 9.81
 
-    def __init__(self, position=0.1, angle=- pi / 8, speed=0.1, time_step=0.1, beam_length=1):
+    def __init__(self, position=0.1, angle=- pi / 8, speed=0.1, time_step=0.1, beam_length=1, stop_condition = 1000):
         self.position = position
         self.angle = angle
         self.speed = speed
         self.time_step = time_step
         self.beam_length = beam_length
         self.size_state = 6 * 6
+        self.stop_condition = stop_condition
 
     def make_move(self, action, environment_parameters):
 
@@ -29,10 +30,10 @@ class BallBeam(EnvironmentABC):
             self.speed += self.time_step*self.g*sin(self.aagle)
             self.position += self.time_step*self.speed
 
-    def is_absorbing_state(self, stop_condition):
+    def is_absorbing_state(self, actions):
         if self.position > 1 : return True
         elif self.position < -1 : return True
-        elif stop_condition : return True
+        elif actions == self.stop_condition : return True
 
     def convert_parameters_to_state(self):
         if self.position > 1: state_x = 0
@@ -68,4 +69,5 @@ class BallBeam(EnvironmentABC):
         self.position = 0.1
         self.angle = - pi / 8
         self.speed = 0.1
+        return self.convert_parameters_to_state()
 
