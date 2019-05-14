@@ -37,3 +37,7 @@ class EnvironmentABC(ABC):
         """
         pass
 
+    @abstractmethod
+    def get_Prize(self, state):
+        pass
+
