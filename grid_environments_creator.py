@@ -17,7 +17,7 @@ class GridEnvironment(EnvironmentABC):
         self.size_horizontal = size_horizontal
         self.size_state = size_horizontal * size_vertical
         self.starting_position = starting_position
-        self.state = self.convert_position_to_state(starting_position)
+        self.state = self.convert_parameters_to_state(starting_position)
         self.environment = [[0 for x in range(self.size_vertical)] for x in range(self.size_horizontal)]
         self.__actions = [1, 2, 3, 4]
         self.__type = type
@@ -136,35 +136,35 @@ class GridEnvironment(EnvironmentABC):
         x,y = point
         self.environment[x][y] = value
 
-    def getPrize(self, state):
+    def get_Prize(self, state):
         x, y = self.convert_state_to_position(state)
         return self.environment[x][y]
 
     def moveUp(self, start_point):
         x,y = start_point
         x -= 1
-        if x < 0 or self.getPrize(x, y) == -2:
+        if x < 0 or self.get_Prize(x, y) == -2:
             x += 1
         return x
 
     def moveDown(self, start_point):
         x,y = start_point
         x += 1
-        if x > (self.size_vertical - 1) or self.getPrize(x, y) == -2:
+        if x > (self.size_vertical - 1) or self.get_Prize(x, y) == -2:
             x -= 1
         return x
 
     def moveLeft(self, start_point):
         x,y = start_point
         y -= 1
-        if y < 0 or self.getPrize(x, y) == -2:
+        if y < 0 or self.get_Prize(x, y) == -2:
             y += 1
         return y
 
     def moveRight(self,start_point):
         x, y = start_point
         y += 1
-        if y > (self.size_horizontal - 1) or self.getPrize(x, y) == -2:
+        if y > (self.size_horizontal - 1) or self.get_Prize(x, y) == -2:
             y -= 1
         return y
 
@@ -183,17 +183,17 @@ class GridEnvironment(EnvironmentABC):
         else :
             print (f"Wrong action number: {action}")
 
-        return action, self.convert_position_to_state((current_position_x, current_position_y))
+        return action, self.convert_parameters_to_state((current_position_x, current_position_y))
 
     def is_absorbing_state(self, state, quantity_actions):
 
-        prize = self.getPrize(state)
+        prize = self.get_Prize(state)
         if self.__type == "to_win":
             return prize == 1 or prize == 0.5
         elif self.__type == "to_loose":
             return prize == -1 or quantity_actions >= self.stop_condition_to_loose
 
-    def convert_position_to_state(self, position):
+    def convert_parameters_to_state(self, position):
         """
         Convert position in grid env to state
 
@@ -209,5 +209,5 @@ class GridEnvironment(EnvironmentABC):
         return position_x, position_y
 
     def reset(self):
-        self.state = self.convert_position_to_state(self.starting_position)
+        self.state = self.convert_parameters_to_state(self.starting_position)
         return self.state

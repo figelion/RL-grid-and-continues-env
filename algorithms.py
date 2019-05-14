@@ -87,7 +87,7 @@ class Ahc(Algorithm):
                     action, current_state = self._make_action(current_state)
                     self._rout.append(action)
 
-                    prize = self._env.getPrize(current_state)
+                    prize = self._env.get_Prize(current_state)
 
                     delta = prize + self._gamma * self.__V[current_state] \
                             - self.__V[previous_state]
@@ -141,7 +141,7 @@ class AHClambda(Algorithm):
                     action, current_state = self._make_action(current_state)
                     self._rout.append(action)
 
-                    prize = self._env.getPrize(current_state)
+                    prize = self._env.get_Prize(current_state)
 
                     delta = prize + self._gamma * self.__V[current_state] - self.__V[previous_state]
                     self.__V[previous_state] += self._alpha * delta
