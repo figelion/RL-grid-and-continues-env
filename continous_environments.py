@@ -60,10 +60,10 @@ class BallBeam(EnvironmentABC):
 
     def get_Prize(self, *args):
         if self.position > 1: prize = -1
-        elif self.position >= 0.5: prize = 1
-        elif self.position >= -0.1: prize = 2
-        elif self.position >= -0.5: prize = 1
-        elif self.position >= -1: prize = 1
+        elif self.position >= 0.5: prize = 0
+        elif self.position >= -0.1: prize = 0
+        elif self.position >= -0.5: prize = 0
+        elif self.position >= -1: prize = 0
         elif self.position < -1: prize = -1
 
         return prize
