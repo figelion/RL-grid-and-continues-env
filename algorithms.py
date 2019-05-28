@@ -152,3 +152,99 @@ class AHClambda(Algorithm):
                     if self._env.is_absorbing_state( self._rout, current_state):
                         self.data[episode][measurement] = len(self._rout)
                         break
+
+class Qlearning(Algorithm):
+
+    def __init__(self, grid_environment,  epsilon, beta, gamma, alpha):
+        super().__init__(grid_environment, epsilon, beta, gamma, alpha)
+        self._Q = []
+
+    def _make_action(self, state):
+        A = self._env.actions
+        greedy_action = []
+        max_Q = max(self._Q[state][:])
+        for x in range(len(self._actions)):
+            if self._Q[state][x] == max_Q:
+                # +1 because A = [1,2,3,4] and x <0,3>
+                greedy_action.append(x + 1)
+        if random() < self._epsilon:
+            action = A[randint(0, (len(greedy_action) - 1))]
+        else:
+            action = greedy_action[randint(0, (len(greedy_action) - 1))]
+
+        return action, self._env.make_move(action, state)
+
+
+    def learn(self, size_episodes, size_measurement):
+        for measurement in range(size_measurement):
+            self._Q = np.zeros((self._env.size_state, len(self._actions)))
+
+            for episode in range(size_episodes):
+                current_state = self._env.state
+                self._rout = []
+
+                while True:
+                    previous_state = current_state
+                    action, current_state = self._make_action(current_state)
+                    self._rout.append(action)
+
+                    prize = self._env.get_Prize(current_state)
+
+                    maxQ_ = max(Q[current_state][:])
+                    delta = prize + self._gamma * maxQ_ - self._Q[previous_state][action - 1]
+
+                    self._Q[previous_state][action - 1] = self._Q[previous_state][action-1] \
+                                                            + self._alpha * delta
+
+                    if self._env.is_absorbing_state(self._rout, current_state):
+                        self.data[episode][measurement] = len(self._rout)
+                        break
+
+
+class QlearningLambda(Algorithm):
+    def __init__(self, grid_environment,  epsilon, beta, gamma, alpha):
+        super().__init__(grid_environment, epsilon, beta, gamma, alpha)
+        self._Q = []
+        self._e = []
+
+    def _make_action(self, state):
+        A = self._env.actions
+        greedy_action = []
+        max_Q = max(self._Q[state][:])
+        for x in range(len(self._actions)):
+            if self._Q[state][x] == max_Q:
+                # +1 because A = [1,2,3,4] and x <0,3>
+                greedy_action.append(x + 1)
+        if random() < self._epsilon:
+            action = A[randint(0, (len(greedy_action) - 1))]
+        else:
+            action = greedy_action[randint(0, (len(greedy_action) - 1))]
+
+        return action, self._env.make_move(action, state)
+
+
+    def learn(self, size_episodes, size_measurement):
+        for measurement in range(size_measurement):
+            self._Q = np.zeros((self._env.size_state, len(self._actions)))
+            self._e = np.zeros((self._env.size_state, len(self._actions)))
+
+            for episode in range(size_episodes):
+                current_state = self._env.state
+                self._rout = []
+
+                while True:
+                    previous_state = current_state
+                    action, current_state = self._make_action(current_state)
+                    self._rout.append(action)
+
+                    prize = self._env.get_Prize(current_state)
+
+                    maxQ_ = max(Q[current_state][:])
+                    delta = prize + self._gamma * maxQ_ - self._Q[previous_state][action - 1]
+
+                    self._Q[previous_state][action - 1] = self._Q[previous_state][action-1] \
+                                                            + self._alpha * delta
+
+                    if self._env.is_absorbing_state(self._rout, current_state):
+                        self.data[episode][measurement] = len(self._rout)
+                        break
