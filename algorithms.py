@@ -96,27 +96,29 @@ class Ahc(Algorithm):
                     self._V[previous_state] = self._alpha * delta
                     self._mi[previous_state][action - 1] += self._beta * delta
 
+
                     if self._env.is_absorbing_state(self._rout, current_state):
+
                         self.data[episode][measurement] = len(self._rout)
                         break
 
 
 class AHClambda(Algorithm):
 
-    def __init__(self, grid_environment,  epsilon, beta, gamma, alpha):
-        super().__init__(grid_environment, epsilon, beta, gamma, alpha)
+    def __init__(self, grid_environment,  epsilon, beta, gamma, alpha, lambd):
+        super().__init__(grid_environment, epsilon, beta, gamma, alpha, lambd)
         # todo: description of fields
-        self.__V = []
-        self.__mi = []
-        self.__e = []
-        self.__ea = []
+        self._V = []
+        self._mi = []
+        self._e = []
+        self._ea = []
 
     def _make_action(self, state):
         A = self._env.actions
         greedy_action = []
-        max_mi = max(self.__mi[state][:])
+        max_mi = max(self._mi[state][:])
         for x in range(len(self._actions)):
-            if self.__mi[state][x] == max_mi:
+            if self._mi[state][x] == max_mi:
                 # +1 because A = [1,2,3,4] and x <0,3>
                 greedy_action.append(x + 1)
         if random() < self._epsilon:
@@ -124,30 +126,47 @@ class AHClambda(Algorithm):
         else:
             action = greedy_action[randint(0, (len(greedy_action) - 1))]
 
-        return self._env.make_move(action, state)
+        return (action, self._env.make_move(action, state))
 
     def learn(self, size_episodes, size_measurement):
         for measurement in range(size_measurement):
-            self.__V = np.ones((self._env.size_vertical, self._env.size_horizontal))
-            self.__mi = np.zeros((self._env.size_vertical, self._env.size_horizontal, len(self._actions)))
+            self._V = np.ones(self._env.size_state)
+            self._mi = np.zeros((self._env.size_state, len(self._actions)))
+            self._e = np.zeros(self._env.size_state)
+            self._ea = np.zeros((self._env.size_state, len(self._actions)))
             self.data = np.empty((size_episodes, size_measurement))
+
 
             for episode in range(size_episodes):
 
-                current_state = self._env.state
+                current_state = self._env.reset()
                 self._rout = []
 
                 while True:
                     previous_state = current_state
+#todo new indets from atom, spradzic lambde
+                    for x in range(self._env.size_state):
+                        if x == current_state:
+                            self._e[x] +=1
+                            continue
+                        self._e[x] *= self._gamma * self._lambda
 
                     action, current_state = self._make_action(current_state)
                     self._rout.append(action)
 
                     prize = self._env.get_Prize(current_state)
 
-                    delta = prize + self._gamma * self.__V[current_state] - self.__V[previous_state]
-                    self.__V[previous_state] += self._alpha * delta
-                    self.__mi[previous_state][action - 1] += self._beta * delta
+                    for x in range(self._env.size_state):
+                        for a in range(len(self._env.actions)):
+                            if (x, a) == (current_state, action):
+                                self._ea[x][a] += 1
+                                continue
+                            self._ea[x][a] *= self._gamma * self._lambda
+
+
+                    delta = prize + self._gamma * self._V[current_state] - self._V[previous_state]
+                    self._V[previous_state] += self._alpha * delta *self._e[current_state]
+                    self._mi[previous_state][action - 1] += self._beta * delta * self._ea[current_state][action - 1]
 
                     if self._env.is_absorbing_state( self._rout, current_state):
                         self.data[episode][measurement] = len(self._rout)
