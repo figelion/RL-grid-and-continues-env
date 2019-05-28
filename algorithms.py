@@ -25,7 +25,7 @@ class Algorithm:
         self.data = []
 
     @abstractmethod
-    def _make_action(self, current_position_x, current_position_y):
+    def _make_action(self, state):
         """
         Is used in the method learn() only.
         Using epsilon-greed strategy choose an action.
