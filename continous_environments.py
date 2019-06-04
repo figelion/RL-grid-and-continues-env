@@ -131,4 +131,4 @@ class CarnOnMountain(EnvironmentABC):
 
         return x * 8 + y
 
-    
+    def
