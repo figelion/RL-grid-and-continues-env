@@ -8,7 +8,7 @@ class GridEnvironment(EnvironmentABC):
     Tool for creating and usage of the grid environment
 
     """
-    def __init__(self, size_horizontal, size_vertical, type, starting_position, st_con_loose=100, ):
+    def __init__(self, size_horizontal, size_vertical, type, starting_position, st_con_loose=1000):
         """
         :param type: type of enviorment 'to_win' or 'to_lose'
         :param st_con_loose: number of actions after the learning will stop for 'to_loose' environment

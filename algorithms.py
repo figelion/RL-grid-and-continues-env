@@ -1,7 +1,7 @@
 import numpy as np
-from random import random, randint
+import random
 from abc import abstractmethod
-
+import collections
 
 class Algorithm:
     def __init__(self, environment, epsilon, beta, gamma, alpha, lambd=0):
@@ -213,8 +213,7 @@ class Qlearning(Algorithm):
                     maxQ_ = max(Q[current_state][:])
                     delta = prize + self._gamma * maxQ_ - self._Q[previous_state][action - 1]
 
-                    self._Q[previous_state][action - 1] = self._Q[previous_state][action-1] \
-                                                            + self._alpha * delta
+                    self._Q[previous_state][action - 1] +=self._alpha * delta
 
                     if self._env.is_absorbing_state(self._rout, current_state):
                         self.data[episode][measurement] = len(self._rout)
@@ -325,3 +324,69 @@ class R (Algorithm):
                     if self._env.is_absorbing_state(self._rout, current_state):
                         self.data[episode][measurement] = len(self._rout)
                         break
+
+class DynaLearning (Algorithm):
+    def __init__(self, grid_environment, n,  epsilon, beta, gamma, alpha):
+        super().__init__(grid_environment, epsilon, beta, gamma, alpha)
+        self.step = collections.namedtuple("Step", field_names=['state','action','next_state','reward'])
+        self._Q = []
+        self._model = []
+        self.memory = []
+        self.n = n
+
+    def _make_action(self, state):
+            A = self._env.actions
+            greedy_action = []
+            max_Q = max(self._Q[state][:])
+            for x in range(len(self._actions)):
+                if self._Q[state][x] == max_Q:
+                    # +1 because A = [1,2,3,4] and x <0,3>
+                    greedy_action.append(x + 1)
+            if random() < self._epsilon:
+                action = A[randint(0, (len(greedy_action) - 1))]
+            else:
+                action = greedy_action[randint(0, (len(greedy_action) - 1))]
+
+            return action, self._env.make_move(action, state)
+
+
+    def learn(self, size_episodes, size_measurement):
+        for measurement in range(size_measurement):
+            print(measurement)
+            self._Q = np.zeros((self._env.size_state, len(self._actions)))
+            #self._model = np.zeros((self._emv.size_state, len(self._actions)))
+
+            for episode in range(size_episodes):
+                print(episode)
+                current_state = self._env.state
+                self._rout = []
+                self.cleanBuffer()
+
+                while True:
+                    previous_state = current_state
+                    action, current_state = self._make_action(current_state)
+                    self._rout.append(action)
+
+                    prize = self._env.get_Prize(current_state)
+
+                    #self.addToBuffer(self.step(state=previous_state,action=action,next_state=current_state,reward=prize))
+                    self.addToBuffer((previous_state,action,current_state,prize))
+                    maxQ_ = max(self._Q[current_state][:])
+                    delta = prize + self._gamma * maxQ_ - self._Q[previous_state][action - 1]
+                    print(current_state)
+
+                    self._Q[previous_state][action - 1] += self._alpha * delta
+                    for x in range(self.n):
+                        state, action, next_state, reward = self.sampleFromBuffer()
+                        maxQ_ = max(self._Q[next_state][:])
+                        delta = reward + self._gamma * maxQ_ - self._Q[state][action-1]
+                        self._Q[state][action-1] += self._alpha * delta
+
+    def addToBuffer(self, x):
+        self.memory.append(x)
+
+    def sampleFromBuffer(self, batch = 1):
+        return random.choice(self.memory)
+
+    def cleanBuffer(self):
+        self.memory.clear()
